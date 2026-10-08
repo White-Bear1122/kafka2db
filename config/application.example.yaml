@@ -1,0 +1,91 @@
+runtime:
+  pollTimeoutMs: 1000
+  maxMessageBytes: 10485760
+  maxRecordsPerMessage: 10000
+  consumerRestartBackoffMs: 5000
+  retry:
+    # The initial attempt plus 3 retries gives at most 4 database attempts.
+    maxRetries: 3
+    backoffMs: [1000, 2000, 4000]
+  failure:
+    directory: ./runError
+    includeRawMessage: true
+
+databases:
+  oceanbase:
+    url: jdbc:mysql://127.0.0.1:2886/wbmd_sjcj?useSSL=false&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
+    user: root@tenant
+    password: plain-text-password
+    driverClass: com.mysql.cj.jdbc.Driver
+    maximumPoolSize: 10
+    connectionTimeoutMs: 10000
+    validationTimeoutMs: 5000
+    validationTimeoutSeconds: 5
+    statementTimeoutSeconds: 60
+  tdengine:
+    url: jdbc:TAOS-WS://127.0.0.1:6041/thingsboard
+    user: root
+    password: taosdata
+    driverClass: com.taosdata.jdbc.ws.WebSocketDriver
+    maximumPoolSize: 10
+    connectionTimeoutMs: 10000
+    validationTimeoutMs: 5000
+    validationTimeoutSeconds: 5
+    statementTimeoutSeconds: 60
+
+kafkaSources:
+  - id: mine-kafka-a
+    bootstrapServers:
+      - 127.0.0.1:9092
+    groupId: kafka2db-mine-a
+    concurrency: 1
+    properties:
+      auto.offset.reset: latest
+      max.poll.records: 1
+      max.poll.interval.ms: 600000
+      session.timeout.ms: 45000
+      security.protocol: PLAINTEXT
+    topics:
+      - name: mine-sensor-data
+        mapping: mine-sensor-data-v1
+
+topicMappings:
+  mine-sensor-data-v1:
+    source:
+      headerFieldCount: 3
+      bodyFieldCount: 6
+      charset: UTF-8
+      removeLineBreaks: true
+
+    oceanbase:
+      database: wbmd_sjcj
+      table: mine_sensor_latest
+      uniqueKeyField: point_code
+      fields:
+        - { column: mine_code, source: headerField1, type: string, required: true }
+        - { column: mine_name, source: headerField2, type: string }
+        - { column: upload_time, source: headerField3, type: datetime }
+        - { column: point_code, source: boreholeField1, type: string, required: true }
+        - { column: sensor_type, source: boreholeField2, type: string }
+        - { column: sensor_position, source: boreholeField3, type: string }
+        - { column: measured_value, source: boreholeField4, type: decimal }
+        - { column: data_status, source: boreholeField5, type: int }
+        - { column: data_time, source: boreholeField6, type: datetime }
+
+    tdengine:
+      table: st_mine_sensor_history
+      subtablePrefix: d_
+      # This references a target column below, not a source field name.
+      subtableSuffix: point_code
+      timestampField: data_time
+      tags:
+        - { column: mine_code, source: headerField1, type: string, required: true }
+        - { column: point_code, source: boreholeField1, type: string, required: true }
+        - { column: sensor_type, source: boreholeField2, type: string }
+      # Order after data_time must match the stable's ordinary-column order.
+      fields:
+        - { column: data_time, source: boreholeField6, type: datetime, required: true }
+        - { column: sensor_position, source: boreholeField3, type: string }
+        - { column: measured_value, source: boreholeField4, type: decimal }
+        - { column: data_status, source: boreholeField5, type: int }
+

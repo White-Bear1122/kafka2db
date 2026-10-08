@@ -1,0 +1,28 @@
+name: PR title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Conventional Commits
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check PR title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const pattern = /^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([^\r\n()]+\))?!?: \S[^\r\n]*$/u;
+            if (!pattern.test(title)) {
+              core.setFailed(
+                'Use a Conventional Commits title, for example: ' +
+                'fix(parser): preserve empty message fields. ' +
+                'See CONTRIBUTING.md for allowed types and breaking changes.'
+              );
+            }

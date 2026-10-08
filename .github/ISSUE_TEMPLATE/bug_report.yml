@@ -1,0 +1,31 @@
+name: Bug report
+description: 报告可复现的问题，帮助改进 kafka2db。
+title: "[Bug]: "
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 描述发生了什么，以及预期应有的行为。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤
+      description: 提供最小复现步骤，以及脱敏后的配置或示例消息。
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 运行环境
+      description: 提供项目版本或提交号、操作系统、Java、Kafka 和相关数据库版本。
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 相关日志
+      description: 粘贴日志或异常堆栈，并移除密码、令牌等敏感内容。
+      render: text

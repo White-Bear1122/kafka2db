@@ -1,0 +1,30 @@
+# Build output
+target/
+*.class
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Local configuration and runtime data
+application.yaml
+application.yml
+application-*.yaml
+application-*.yml
+application.local.yaml
+application.local.yml
+.env
+.env.*
+!.env.example
+logs/
+runError/
+*.log
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini

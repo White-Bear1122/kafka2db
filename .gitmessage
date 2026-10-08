@@ -1,0 +1,11 @@
+# <type>(<scope>): <description>
+#
+# Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
+# Scope is optional. Example: fix(parser): preserve empty message fields
+#
+# Separate the optional body from the subject with a blank line.
+# Explain the reason for the change and any relevant behavior changes.
+#
+# For breaking changes, add ! before the colon and describe migration steps
+# in the body or a BREAKING CHANGE: footer.
+# Reference related issues in a footer, for example: Closes #123
